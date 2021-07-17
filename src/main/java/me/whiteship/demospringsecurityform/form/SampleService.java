@@ -1,0 +1,36 @@
+package me.whiteship.demospringsecurityform.form;
+
+import me.whiteship.demospringsecurityform.account.Account;
+import me.whiteship.demospringsecurityform.account.AccountContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+
+@Service
+public class SampleService {
+
+    public void dashboard() {
+//        1.
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        Object principal = authentication.getPrincipal();
+//        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+//        Object credentials = authentication.getCredentials();
+//        boolean authenticated = authentication.isAuthenticated();
+//        2.
+//        Account account = AccountContext.getAccount();
+//        System.out.println("============");
+//        System.out.println(account.getUsername());
+
+//        3.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        System.out.println("======+======");
+        System.out.println(authentication);
+        System.out.println(userDetails.getUsername());
+    }
+}
