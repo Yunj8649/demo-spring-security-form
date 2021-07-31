@@ -2,12 +2,15 @@ package me.whiteship.demospringsecurityform.form;
 
 import me.whiteship.demospringsecurityform.account.AccountContext;
 import me.whiteship.demospringsecurityform.account.AccountRepository;
+import me.whiteship.demospringsecurityform.common.SecurityLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
+import java.util.concurrent.Callable;
 
 /**
  * 스프링시큐리티를 깔기전 문제점 1. 인증할 방법이 없다 2. 인증을 못하니 누군지 알 수가 없다
@@ -63,4 +66,42 @@ public class SampleController {
         model.addAttribute("message", "Hello, User " + principal.getName());
         return "user";
     }
+
+    // webAsyncManagerIntegrationFilter
+    // 스프링 mvc async 핸드러를 지원하는 기능
+    // 스프링 mvc async는 다른 스레드를 사용하지만 그 스레드에서도 동일한 시큐리티 컨텍스트를 사용할 수 있도록 지원해준다.
+    // 원래는 스레드 로컬을 사용하기 때문에 자신과 동일한
+    // callable 로 리턴하면 콜러블안에서 처리하는 일들을 처리하기 전에 이미 응답을 내보낸다
+    // 이 리퀘스트를 처리하고 잇던 스레드를 반환하고 콜러블 안에서 하는일이 완료가 됐을 때 쯤 그 응답을 보낸다.
+    // 별도 스레드를 사용하지만 같은 principal를 사용할 수 있도록 해준다.
+    // 실행 단축키 : control + R
+    // 람다 자동 변경 : option + enter
+    @GetMapping("/async-handler")
+    @ResponseBody
+    public Callable<String> asyncHandler() {
+        SecurityLogger.log("MVC");
+
+//        return new Callable<String>() {
+//            @Override
+//            public String call() throws Exception {
+//                SecurityLogger.log("Callable");
+//                return "Async Handler";
+//            }
+//        };
+        return () -> {
+            SecurityLogger.log("Callable");
+            return "Async Handler";
+        };
+    }
+
+    @GetMapping("/async-service")
+    @ResponseBody
+    public String asyncService() {
+        SecurityLogger.log("MVC, before async service");
+        sampleService.asyncService();
+        SecurityLogger.log("MVC, after async service");
+        sampleService.asyncService();
+        return "Async Service";
+    }
+
 }

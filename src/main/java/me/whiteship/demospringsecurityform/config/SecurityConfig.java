@@ -1,5 +1,6 @@
 package me.whiteship.demospringsecurityform.config;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.security.access.AccessDecisionManager;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
@@ -56,21 +58,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
+        // 정적인 리퀘스트 처리
         // 적용하고 싶지 않은 요청들이 있을 경우
-//        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+//        web.ignoring().mvcMatchers("/favicon.ico");
+        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // 동적인 리퀘스트 처리
         http.authorizeRequests()
                 .mvcMatchers("/", "/info", "/account/**").permitAll()
                 .mvcMatchers("/admin").hasRole("ADMIN")
                 .mvcMatchers("/user").hasRole("USER")
                 .anyRequest().authenticated()
 //                .accessDecisionManager(accessDecisionManager())
+//                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                // 리소스 낭비되어서 사용하지 않음
+                // 동적으로 거르는건 추천하지 않음 (동적인 리퀘스트가 아닌 경우/브라우저에서 요청해서 들어오는 경우) (anonymousFilter에서 걸러진다)
                 .expressionHandler(expressionHandler());
         http.formLogin();
         http.httpBasic();
+
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+        // 시큐리티 스레드 로컬
+        // 시큐리티 메인 스레드의 정보를 하위 스레드로 공유 해주는 역할
     }
 //
 //    @Override
