@@ -2,6 +2,7 @@ package me.whiteship.demospringsecurityform.form;
 
 import me.whiteship.demospringsecurityform.account.AccountContext;
 import me.whiteship.demospringsecurityform.account.AccountRepository;
+import me.whiteship.demospringsecurityform.book.BookRepository;
 import me.whiteship.demospringsecurityform.common.SecurityLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,6 +28,9 @@ public class SampleController {
 
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    BookRepository bookRepository;
 
     @GetMapping("/")
     public String index(Model model, Principal principal) {
@@ -64,6 +68,7 @@ public class SampleController {
     @GetMapping("/user")
     public String user(Model model, Principal principal) {
         model.addAttribute("message", "Hello, User " + principal.getName());
+        model.addAttribute("books", bookRepository.findCurrentUserBooks());
         return "user";
     }
 
